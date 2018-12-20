@@ -1,12 +1,15 @@
 import { Request, Response, Router } from "express";
-
+import {UserService} from "../service/userService";
 const _moduleTag = "UserController";
 
 export class UserController {
     public router: Router;
+    private userService: UserService;
+
     constructor() {
         this.router = Router();
         this.init();
+        this.userService = new UserService();
     }
 
     public init() {
@@ -19,6 +22,8 @@ export class UserController {
     }
 
     private Register = async (req: Request, res: Response) => {
+        await this.userService.Register(req);
+
         return res.status(200).send();
     }
 
