@@ -1,4 +1,4 @@
-import {UserRepositoryInstance} from "../repository/userDb";
+import {UserRepositoryInstance} from "../Repository/userDb";
 import { Request } from "express";
 import { UserProfile } from '../Model/User';
 import * as bcrypt from 'bcrypt';
