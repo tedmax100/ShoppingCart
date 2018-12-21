@@ -1,5 +1,5 @@
 import { Request, Response, Router } from "express";
-import {UserService} from "../service/userService";
+import {UserService} from "../Service/userService";
 import { UserApiStatus } from '../Model/ApiStatus';
 import { Login } from '../Model/Response/Login';
 import { GetUserProfile } from '../Model/Response/GetUserProfile';

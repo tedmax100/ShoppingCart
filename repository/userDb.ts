@@ -1,6 +1,5 @@
 import * as mysql from "mysql";
 import { UserProfile } from '../Model/User';
-import { connect } from "tls";
 import { logger } from '../logger';
 import { UserApiStatus } from '../Model/ApiStatus';
 
