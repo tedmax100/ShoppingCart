@@ -1,42 +1,76 @@
 import * as bcrypt from "bcrypt";
 
 export class UserProfile {
-    constructor(private account: string, private password: string, private name: string, private　credit: number) {
-        if(this.password == null || this.password.length < 8) this.password = "";
-        else this.password = bcrypt.hashSync(this.password, 5);
+    private userId: number;
+    private account: string;
+    private password: string;
+    private userName: string;
+    private credit: number;
+    private createdTime: number;
+
+    constructor() {
+        this.userId = 0;
+        this.account = "";
+        this.password = "";
+        this.userName = "";
+        this.credit = 0;
+        this.createdTime = 0;
+    }
+
+    get UserId() : number {
+        return this.userId;
+    }
+    public SetUserId = (value: number) => {
+        this.userId = value;
+        return this;
     }
 
     get Account(): string {
         return this.account;
     }
-    set Account(value: string) {
+    public  SetAccount(value: string) {
         this.account = value;
+        return this;
     }
 
     get Password(): string {
         return this.password;
     } 
-/*     set Password(value: string) {
-        if(value.length < 6) this.password = "";
-        else {
-            let hashPwd = await bcrypt.hash(value, 5);
-            this.password = hashPwd;
-        }
-    } */
-    get Name():string {
-        return this.name;
+    public SetPassword(value: string) {
+        if(value.length < 8) this.password = "";
+        else this.password = bcrypt.hashSync(value, 5);
+        return this;
+    } 
+    get UserName():string {
+        return this.userName;
     }
-    set Name(value: string) {
-        this.name = value;
+    public SetUserName(value: string) {
+        this.userName = value;
+        return this;
     }
     get Credit(): number {
         return this.credit;
     }
 
-    public IsInValidate = (): boolean => {
+    public SetCredit = (value: number) => {
+        this.credit = value;
+        return this;
+    }
+
+    get CreatedTime(): number {
+        return this.createdTime;
+    }
+
+    public SetCreatedTime = (value: number) => {
+        this.createdTime = value;
+        return this;
+    }
+    public IsInvalidateRegister = (): boolean => {
         return this.Account == null 
             && this.Password == null
-            && this.Name == null
+            && this.UserName == null
             && this.credit == null;
     }
+
+    public IsNullObject = (): boolean => this.account === "";
 }
