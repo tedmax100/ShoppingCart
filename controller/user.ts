@@ -1,5 +1,8 @@
 import { Request, Response, Router } from "express";
 import {UserService} from "../service/userService";
+import { UserApiStatus } from '../Model/ApiStatus';
+import { Login } from '../Model/Response/Login';
+import { GetUserProfile } from '../Model/Response/GetUserProfile';
 const _moduleTag = "UserController";
 
 export class UserController {
@@ -22,17 +25,30 @@ export class UserController {
     }
 
     private Register = async (req: Request, res: Response) => {
-        await this.userService.Register(req);
+        const result = await this.userService.Register(req);
+        if (result[0] === UserApiStatus.INTERNAL_SYSTEM_ERROR) return res.status(500).send();
 
-        return res.status(200).send();
+        if (result[0] === UserApiStatus.DUPLICATE_ACCOUNT) return res.status(409).send();
+ 
+        return res.status(200).json(new Login(result[1]!.UserId, result[1]!.UserName));
     }
 
     private Login = async (req: Request, res: Response) => {
-        return res.status(200).send();
+        const result = await this.userService.Login(req);
+        if (result[0] === UserApiStatus.INTERNAL_SYSTEM_ERROR) return res.status(500).send();
+
+        if (result[0] === UserApiStatus.USER_NOT_FOUND || result[0] === UserApiStatus.PASSWORD_ERROR) return res.status(401).send();
+
+        return res.status(200).json(new Login(result[1]!.UserId, result[1]!.UserName));
     }
 
     private GetUserProfile = async (req: Request, res: Response) => {
-        return res.status(200).send();
+        const result = await this.userService.GetUserProfile(req);
+        if (result[0] === UserApiStatus.INTERNAL_SYSTEM_ERROR) return res.status(500).send();
+
+        if (result[0] === UserApiStatus.USER_NOT_FOUND ) return res.status(401).send();
+
+        return res.status(200).json(new GetUserProfile(result[1]!.UserId, result[1]!.UserName, result[1]!.Credit, result[1]!.CreatedTime, 0));
     }
 
     private GetSettleHistory = async (req: Request, res: Response) => {
