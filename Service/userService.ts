@@ -59,8 +59,9 @@ export class UserService {
         // step 2 : get history 
 
         let userProfile = new UserProfile()
-                            .SetAccount(context.body.account)
-        if(userProfile.Account == "") return [UserApiStatus.PARAMETER_ERROR, undefined];
+                            .SetUserId(context.body.user_id);
+
+        if(userProfile.UserId == 0) return [UserApiStatus.PARAMETER_ERROR, undefined];
 
         let userProfileDb = await UserRepositoryInstance.GetUserProfile(userProfile);
         

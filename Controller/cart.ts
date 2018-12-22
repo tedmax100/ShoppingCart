@@ -1,22 +1,28 @@
 import { Request, Response, Router } from "express";
+import { CartService } from "../Service/cartService";
 
 const _moduleTag = "CartController";
 
 export class CartController {
     public router: Router;
+    private cartService: CartService;
+
     constructor() {
         this.router = Router();
         this.init();
+        this.cartService = new CartService();
     }
 
     public init() {
-        this.router.post("/:cart_id/item/:item", this.AddItemToCart);
-        this.router.delete("/:cart_id/item/:item",  this.DeleteItemOfCart);
+        this.router.post("/item/:item", this.AddItemToCart);
+        this.router.delete("/item/:item",  this.DeleteItemOfCart);
         this.router.get("/:cart_id",  this.GetInfoOfCart);
         this.router.post("/:cart_id/settle", this.SettleCart);
     }
 
     private AddItemToCart = async (req: Request, res: Response) => {
+        const result = await this.cartService.AddItemToCart(req);
+
         return res.status(200).send();
     }
 

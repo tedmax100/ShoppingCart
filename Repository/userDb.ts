@@ -2,6 +2,7 @@ import * as mysql from "mysql";
 import { UserProfile } from '../Model/User';
 import { logger } from '../logger';
 import { UserApiStatus } from '../Model/ApiStatus';
+import { OrderDetail } from "../Model/Order";
 
 const writablePool = mysql.createPool({
     connectionLimit : 10,
@@ -25,7 +26,7 @@ const moduleTag = "UserRepository_";
 class UserRepository {
     public Register = async (params: UserProfile): Promise<[boolean, number, UserApiStatus]> => {
         const funTag = `${moduleTag}_Register`;
-         return new Promise<[boolean, number ,UserApiStatus]>((resolve) => {
+        return new Promise<[boolean, number ,UserApiStatus]>((resolve) => {
             writablePool
             .query("INSERT INTO user_profile(user_name, account, password, credit, created_time) \
                     VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP);", 
@@ -102,25 +103,29 @@ class UserRepository {
         })
     }
 
-    public GetUserSettleHistory = async (params: any) => {
+    public GetUserSettleHistory = async (params: UserProfile) => {
         const funTag = `${moduleTag}_GetUserSettleHistory`;
-        return new Promise<[boolean, undefined]>((resolve) => {
+/*         return new Promise<[boolean, undefined]>((resolve) => {
             readOnlyPool
-            .query("SELECT u.account, u.user_name, t.order_no, p.item_name, p.item_price, i.amount \
+            .query("SELECT u.account, u.user_name, t.order_no, p.item_name, p.item_price, i.amount, t.created_time \
                     FROM carts.user_profile AS u \
                     INNER JOIN carts.trans_order AS t ON u.user_id = t.user_id \
                     INNER JOIN carts.cart_items AS i ON t.order_no = i.order_no \
                     INNER JOIN carts.product_item AS p ON i.item_id = p.item_id \
                     WHERE u.user_id = ?;", 
-                    [params.userId], 
+                    [params.UserId], 
                     (err, result) => {
                         if(err) {
                             logger.error(funTag, {error:err, params});
                             return resolve([false, undefined]);
                         }
+                        let orderInfo = new OrderDetail().SetAccount()
+
+                        if(result.length === 0) return resolve([true,  new OrderDetail()]);
+                            
                     })
             return resolve([true, undefined])
-        })
+        }) */
     }
 
     public AddUserDeposit = async (params: any) => {
