@@ -3,14 +3,11 @@ export class ItemDetail {
     private itemId: number;
     private itemPrice: number;
     private amount: number;
-    private subtotal: number;
-
     constructor(){
         this.itemName = "";
         this.itemId = 0;
         this.itemPrice = 0;
-        this.amount = 0;
-        this.subtotal = 0 ; 
+        this.amount = 0; 
     }
 
     get ItemName(): string {
@@ -42,14 +39,6 @@ export class ItemDetail {
     }
     public SetAmount = (value: number) => {
         this.amount = value;
-        return this;
-    }
-
-    get Subtotal(): number {
-        return this.subtotal;
-    }
-    public SetSubtotal = (value: number) => {
-        this.subtotal = value;
         return this;
     }
 }

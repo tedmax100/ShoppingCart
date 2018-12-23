@@ -1,8 +1,9 @@
-export enum UserApiStatus {
+export enum StatusEnum {
     SUCCESS = 0,
     INTERNAL_SYSTEM_ERROR,
     USER_NOT_FOUND,
     PASSWORD_ERROR,
     DUPLICATE_ACCOUNT,
-    PARAMETER_ERROR
+    PARAMETER_ERROR,
+    ITEM_NOT_ENOUGH
 }

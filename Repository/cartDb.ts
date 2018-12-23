@@ -2,6 +2,8 @@ import * as mysql from "mysql";
 import { ShoppingCar } from "../Model/Cart";
 import { logger } from "../logger";
 import { ItemDetail } from "../Model/Item";
+import {StatusEnum} from "../Model/ApiStatus";
+import { debug } from "util";
 
 const writablePool = mysql.createPool({
     connectionLimit : 10,
@@ -23,71 +25,48 @@ const readOnlyPool = mysql.createPool({
 
 const moduleTag = "CartRepository_";
 class CartRepository {
-    public AddItemsToCart = async (params: ShoppingCar) => {
-        const funTag = `${moduleTag}_AddItemToCart`;
-        return new Promise<boolean>((resolve) => {
-            writablePool.getConnection((err, conn) => {
-                conn.beginTransaction(txErr => {
-                    if(txErr) {
-                        conn.release();
-                        return false;
-                    }
-                    const promises: Promise<boolean>[] = [];
-                    params.ItemList.forEach(v => {
-                       promises.push(this.AddItemToCart(params.UserId, v, conn));
-                    })
-                    Promise.all(promises).then((allResult) => {
-                        allResult.map(r => {
-                            if(r === false) {
-                                return conn.rollback(()=> {
-                                    conn.release();
-                                    return resolve(false);
-                                })
-                            }
-                        });
-                        conn.commit((commitErr) => {
-                            if(commitErr){
-                                return conn.rollback(() => {
-                                    conn.release();
-                                    return resolve(false);
-                                })
-                            }
-                            conn.release();
-                            return resolve(true);
-                        })
-                    });
-                    
-                })            
+    public AddItemToCart = async (userId: number, item: ItemDetail): Promise<StatusEnum> => {
+        return new Promise<StatusEnum>((resolve) => {
+            writablePool.query(`CALL usp_add_item_to_cart(${userId}, ${item.ItemId}, ${item.Amount})`,
+            (err, result) =>{
+                if(err) {
+                    return resolve(StatusEnum.INTERNAL_SYSTEM_ERROR);
+                }
+                if(result[0][0].affectedRows === 0) return resolve(StatusEnum.ITEM_NOT_ENOUGH);
+                return resolve(StatusEnum.SUCCESS);
             })
         })
     }
 
-    private AddItemToCart = async (userId: number, item: ItemDetail, conn: mysql.PoolConnection): Promise<boolean> => {
-        return new Promise<boolean>((resolve) => {
-            conn.query(`INSERT INTO cart_items (user_id, item_id, amount, created_time) 
-                        SELECT ${userId}, p.item_id, ${item.Amount}, UNIX_TIMESTAMP() 
-                        FROM product_item AS p 
-                        WHERE p.item_id = ${item.ItemId} 
-                        ON DUPLICATE KEY UPDATE amount = ${item.Amount};`,
+    public DeleteItemOfCart = async (userId: number, item: ItemDetail): Promise<StatusEnum> => {
+        return new Promise<StatusEnum>((resolve) => {
+            writablePool.query(`DELETE FROM carts.cart_items 
+                        WHERE user_id = ${userId} AND item_id = ${item.ItemId};`,
                         (err, result) => {
                             if(err) {
-                               return resolve(false);
+                               return resolve(StatusEnum.INTERNAL_SYSTEM_ERROR);
                             }
-                            return resolve(true);
+                            if(result.affectedRows === 0) return resolve(StatusEnum.ITEM_NOT_ENOUGH);
+                            return resolve(StatusEnum.SUCCESS);
                         }) 
         })
-    }
-
-    public DeleteItemOfCart = async (param: any) => {
-
     }
 
     public GetInfoOfCart = async (params: any) => {
 
     }
 
-    public SettleCart = async (params: any) => {
-
+    public Checkout = async (params: ShoppingCar) => {
+        return new Promise<StatusEnum>((resolve) => {
+            writablePool.query(`CALL usp_checkout(${params.UserId})`, (checkoutErr, result) => {
+                if(checkoutErr) {
+                    debugger;
+                    return resolve(StatusEnum.INTERNAL_SYSTEM_ERROR);
+                }
+                if(result[0][0].affectedRows === 0) return resolve(StatusEnum.ITEM_NOT_ENOUGH);
+                return resolve(StatusEnum.SUCCESS);
+            })
+        })
     }
 }
 

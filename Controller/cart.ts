@@ -1,5 +1,6 @@
 import { Request, Response, Router } from "express";
 import { CartService } from "../Service/cartService";
+import {StatusEnum} from "../Model/ApiStatus";
 
 const _moduleTag = "CartController";
 
@@ -17,17 +18,22 @@ export class CartController {
         this.router.post("/item/:item", this.AddItemToCart);
         this.router.delete("/item/:item",  this.DeleteItemOfCart);
         this.router.get("/:cart_id",  this.GetInfoOfCart);
-        this.router.post("/:cart_id/settle", this.SettleCart);
+        this.router.post("/checkout", this.SettleCart);
+
     }
 
     private AddItemToCart = async (req: Request, res: Response) => {
         const result = await this.cartService.AddItemToCart(req);
-
-        return res.status(200).send();
+        if(result === StatusEnum.SUCCESS) return res.status(200).send();
+        if(result === StatusEnum.ITEM_NOT_ENOUGH) return res.status(409).send();
+        if(result === StatusEnum.INTERNAL_SYSTEM_ERROR) return res.status(500).send();
     }
 
     private DeleteItemOfCart = async (req: Request, res: Response) => {
-        return res.status(200).send();
+        const result = await this.cartService.DeleteItemFromCart(req);
+        if(result === StatusEnum.SUCCESS) return res.status(200).send();
+        if(result === StatusEnum.ITEM_NOT_ENOUGH) return res.status(409).send();
+        if(result === StatusEnum.INTERNAL_SYSTEM_ERROR) return res.status(500).send();
     }
 
     private GetInfoOfCart = async (req: Request, res: Response) => {
@@ -35,8 +41,14 @@ export class CartController {
     }
 
     private SettleCart = async (req: Request, res: Response) => {
+        const result = await this.cartService.Checkout(req);
+        if(result === StatusEnum.SUCCESS) return res.status(200).send();
+        if(result === StatusEnum.ITEM_NOT_ENOUGH) return res.status(409).send();
+        if(result === StatusEnum.INTERNAL_SYSTEM_ERROR) return res.status(500).send();
         return res.status(200).send();
     }
+
+
 }
 
 const cartController = new CartController();
