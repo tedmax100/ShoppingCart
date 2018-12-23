@@ -73,4 +73,6 @@ export class UserProfile {
     }
 
     public IsNullObject = (): boolean => this.account === "";
+
+    public GetQuerySyntax = (): string => this.account === "" ? `user_id = ${this.userId}` : `account = ${this.account}`;
 }
