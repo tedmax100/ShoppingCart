@@ -41,7 +41,7 @@ export class UserService {
         let pwdCompare = await bcrypt.compare(userProfile.Password, userProfileDb[1]!.Password);
         if(pwdCompare === false) return [StatusEnum.PASSWORD_ERROR, undefined];
 
-        return [StatusEnum.SUCCESS, userProfile];
+        return [StatusEnum.SUCCESS, userProfileDb[1]];
     }
 
     public GetUserProfile = async(context: Request): Promise<[StatusEnum, UserProfile|undefined]> =>　{
@@ -77,7 +77,9 @@ export class UserService {
                 const itemDetail = new ItemDetail();
                 itemDetail.SetItemName(item.item_name)
                     .SetAmount(item.amount)
-                    .SetItemPrice(item.item_price);
+                    .SetItemPrice(item.item_price)
+                    .SetSubtoal(item.subtotal);
+
                 order.AddItem(itemDetail); 
             });
             orderHistroy.AddOrder(order);
@@ -91,16 +93,12 @@ export class UserService {
         // step 2 : add deposit 
 
         let userProfile = new UserProfile()
-                            .SetAccount(context.body.account)
-        if(userProfile.Account == "") return [StatusEnum.PARAMETER_ERROR, undefined];
+                            .SetUserId(context.body.user_id)
+        let depositAmount = parseInt(context.body.amount);
 
-        let userProfileDb = await UserRepositoryInstance.GetUserProfile(userProfile);
-        
-        if(userProfileDb[0] === false) return [StatusEnum.INTERNAL_SYSTEM_ERROR, undefined];
-        
-        if(userProfileDb[1]!.IsNullObject()) return [StatusEnum.USER_NOT_FOUND, undefined];
+        let depositResult = await UserRepositoryInstance.AddUserDeposit(userProfile, depositAmount);
 
-        return [StatusEnum.SUCCESS, userProfileDb[1]!];
+        return depositResult;
     }
 
     public GetLogs = async(context: Request): Promise<[StatusEnum, UserProfile|undefined]> =>　{

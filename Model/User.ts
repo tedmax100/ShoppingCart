@@ -7,6 +7,7 @@ export class UserProfile {
     private userName: string;
     private credit: number;
     private createdTime: number;
+    private lastLoginTime: number;
 
     constructor() {
         this.userId = 0;
@@ -15,6 +16,7 @@ export class UserProfile {
         this.userName = "";
         this.credit = 0;
         this.createdTime = 0;
+        this.lastLoginTime = 0;
     }
 
     get UserId() : number {
@@ -38,7 +40,8 @@ export class UserProfile {
     } 
     public SetPassword(value: string) {
         if(value.length < 8) this.password = "";
-        else this.password = bcrypt.hashSync(value, 5);
+        //else this.password = bcrypt.hashSync(value, 5);
+        else this.password = value;
         return this;
     } 
     get UserName():string {
@@ -65,6 +68,16 @@ export class UserProfile {
         this.createdTime = value;
         return this;
     }
+
+    get LastLoginTime(): number {
+        return this.lastLoginTime;
+    }
+
+    public SetLastLoginTime = (value: number) => {
+        this.lastLoginTime = value;
+        return this;
+    }
+
     public IsInvalidateRegister = (): boolean => {
         return this.Account == null 
             && this.Password == null
@@ -74,5 +87,5 @@ export class UserProfile {
 
     public IsNullObject = (): boolean => this.account === "";
 
-    public GetQuerySyntax = (): string => this.account === "" ? `user_id = ${this.userId}` : `account = ${this.account}`;
+    public GetQuerySyntax = (): string => this.account === "" ? `user_id = ${this.userId}` : `account = '${this.account}'`;
 }

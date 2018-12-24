@@ -46,12 +46,13 @@ export class OrderHistroy {
                 return {
                     order_no:o.OrderNo,
                     created_time: o.CreatedTime,
-                    subtotal: o.Subtotal,
+                    total: o.Total,
                     item_list: o.ItemList.map(i => {
                         return {
                             item_name: i.ItemName,
                             item_price: i.ItemPrice,
-                            amount: i.Amount
+                            amount: i.Amount,
+                            subtotal: i.Subtoal
                         }
                     })
                 }

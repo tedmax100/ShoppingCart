@@ -4,6 +4,7 @@ import { logger } from "../logger";
 import { ItemDetail } from "../Model/Item";
 import {StatusEnum} from "../Model/ApiStatus";
 import { debug } from "util";
+import { UserProfile } from '../Model/User';
 
 const writablePool = mysql.createPool({
     connectionLimit : 10,
@@ -11,7 +12,8 @@ const writablePool = mysql.createPool({
     port : 3307,
     user : "carts",
     password : "qwer1234",
-    database : "carts"
+    database : "carts",
+    multipleStatements : true
 });
 
 const readOnlyPool = mysql.createPool({
@@ -20,7 +22,8 @@ const readOnlyPool = mysql.createPool({
     port : 3307,
     user : "carts",
     password : "qwer1234",
-    database : "carts"
+    database : "carts",
+    multipleStatements : true
 });
 
 const moduleTag = "CartRepository_";
@@ -41,7 +44,9 @@ class CartRepository {
     public DeleteItemOfCart = async (userId: number, item: ItemDetail): Promise<StatusEnum> => {
         return new Promise<StatusEnum>((resolve) => {
             writablePool.query(`DELETE FROM carts.cart_items 
-                        WHERE user_id = ${userId} AND item_id = ${item.ItemId};`,
+                        WHERE user_id = ${userId} AND item_id = ${item.ItemId};
+                        INSERT INTO user_log(user_id, action_type, action_value, remark, created_time)
+		                VALUES (${userId}, 2, 'delete item', ${item.ItemId}, UNIX_TIMESTAMP());`,
                         (err, result) => {
                             if(err) {
                                return resolve(StatusEnum.INTERNAL_SYSTEM_ERROR);
@@ -52,8 +57,18 @@ class CartRepository {
         })
     }
 
-    public GetInfoOfCart = async (params: any) => {
-
+    public GetItemsOfCart = async (params: UserProfile) => {
+        return new Promise<[StatusEnum, any[]]>((resolve) => {
+            writablePool.query(`SELECT p.item_id, p.item_name, p.item_price, c.amount, c.created_time, c.subtotal FROM carts.cart_items AS c
+                                INNER JOIN carts.product_item  AS p ON c.item_id = p.item_id
+                                WHERE c.user_id = ${params.UserId} AND order_no = 0;`,
+                        (err, result) => {
+                            if(err) {
+                               return resolve([StatusEnum.INTERNAL_SYSTEM_ERROR, []]);
+                            }
+                            return resolve([StatusEnum.SUCCESS, result]);
+                        }) 
+        })
     }
 
     public Checkout = async (params: ShoppingCar) => {
@@ -63,7 +78,7 @@ class CartRepository {
                     debugger;
                     return resolve(StatusEnum.INTERNAL_SYSTEM_ERROR);
                 }
-                if(result[0][0].affectedRows === 0) return resolve(StatusEnum.ITEM_NOT_ENOUGH);
+                if(result[1][0].affectedRows === 0) return resolve(StatusEnum.ITEM_NOT_ENOUGH);
                 return resolve(StatusEnum.SUCCESS);
             })
         })

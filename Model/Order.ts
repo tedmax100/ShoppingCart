@@ -4,14 +4,14 @@ export class OrderDetail {
     private orderNo: number;
     private itemList: ItemDetail[];
     private createdTime : number;
-    private subtotal: number;
+    private total: number;
 
     constructor() {
         this.orderNo = 0;
         this.itemList = [];
         this.createdTime = 0;
         this.itemList = [];
-        this.subtotal = 0;
+        this.total = 0;
     }
 
     get OrderNo(): number {
@@ -31,7 +31,7 @@ export class OrderDetail {
     }
     public AddItem = (item: ItemDetail) => {
         this.itemList.push(item);
-        this.subtotal += item.Amount * item.ItemPrice;
+        this.total += item.Subtoal;
     }
 
 
@@ -43,8 +43,24 @@ export class OrderDetail {
         return this;
     }
 
-    get Subtotal(): number {
+    get Total(): number {
 
-        return this.subtotal;
+        return this.total;
+    }
+
+    get Response(): Object {
+        return {
+            item_list: this.itemList.map(v => {
+                return {
+                    item_id: v.ItemId,
+                    item_name: v.ItemName,
+                    item_price: v.ItemPrice,
+                    amount: v.Amount,
+                    created_time: v.CreatedTime,
+                    subtotal: v.Subtoal
+                }
+            }),
+            total: this.total
+        }
     }
 }

@@ -17,7 +17,7 @@ export class CartController {
     public init() {
         this.router.post("/item/:item", this.AddItemToCart);
         this.router.delete("/item/:item",  this.DeleteItemOfCart);
-        this.router.get("/:cart_id",  this.GetInfoOfCart);
+        this.router.get("/:userId",  this.GetInfoOfCart);
         this.router.post("/checkout", this.SettleCart);
 
     }
@@ -37,7 +37,11 @@ export class CartController {
     }
 
     private GetInfoOfCart = async (req: Request, res: Response) => {
-        return res.status(200).send();
+        const result = await this.cartService.GetItemsOfCart(req);
+        if(result[0] === StatusEnum.ITEM_NOT_ENOUGH) return res.status(409).send();
+        if(result[0] === StatusEnum.INTERNAL_SYSTEM_ERROR) return res.status(500).send();
+        debugger;
+        return res.status(200).json(result[1].Response);
     }
 
     private SettleCart = async (req: Request, res: Response) => {

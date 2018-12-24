@@ -48,12 +48,17 @@ export class UserController {
 
         if (result[0] === StatusEnum.USER_NOT_FOUND ) return res.status(401).send();
 
-        return res.status(200).json(new GetUserProfile(result[1]!.UserId, result[1]!.UserName, result[1]!.Credit, result[1]!.CreatedTime, 0));
+        return res.status(200).json(new GetUserProfile(result[1]!.UserId, result[1]!.UserName, result[1]!.Credit, result[1]!.CreatedTime, result[1]!.LastLoginTime));
     }
 
 
     private Deposit = async (req: Request, res: Response) => {
-        return res.status(200).send();
+        const result = await this.userService.AddUserDeposit(req);
+        if (result[0] === StatusEnum.INTERNAL_SYSTEM_ERROR) return res.status(500).send();
+
+        if (result[0] === StatusEnum.USER_NOT_FOUND ) return res.status(401).send();
+
+        return res.status(200).send(new GetUserProfile(result[1]!.UserId, result[1]!.UserName, result[1]!.Credit, result[1]!.CreatedTime, 0));
     }
 
     private GetLogs = async (req: Request, res: Response) => {

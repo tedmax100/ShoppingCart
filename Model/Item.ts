@@ -3,11 +3,16 @@ export class ItemDetail {
     private itemId: number;
     private itemPrice: number;
     private amount: number;
+    private createdTime: number;
+    private subtoal : number;
+
     constructor(){
         this.itemName = "";
         this.itemId = 0;
         this.itemPrice = 0;
         this.amount = 0; 
+        this.createdTime = 0;
+        this.subtoal = 0;
     }
 
     get ItemName(): string {
@@ -39,6 +44,22 @@ export class ItemDetail {
     }
     public SetAmount = (value: number) => {
         this.amount = value;
+        return this;
+    }
+
+    get CreatedTime(): number {
+        return this.createdTime;
+    }
+    public SetCreatedTime = (value: number) => {
+        this.createdTime = value;
+        return this;
+    }
+
+    get Subtoal(): number {
+        return this.subtoal;
+    }
+    public SetSubtoal = (value: number) => {
+        this.subtoal = value;
         return this;
     }
 }
