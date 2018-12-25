@@ -47,7 +47,6 @@ export class CartService {
                 order.AddItem(itemDetail);
             })
         }
-        debugger;
         return [result[0], order];
 
     }

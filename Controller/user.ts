@@ -3,7 +3,9 @@ import {UserService} from "../Service/userService";
 import { StatusEnum } from '../Model/ApiStatus';
 import { Login } from '../Model/Response/Login';
 import { GetUserProfile } from '../Model/Response/GetUserProfile';
-const _moduleTag = "UserController";
+import { logger } from '../logger';
+import { checkUser } from '../Middleware/checkUser';
+const moduleTag = "UserController";
 
 export class UserController {
     public router: Router;
@@ -19,59 +21,96 @@ export class UserController {
         this.router.post("/register", this.Register);
         this.router.post("/login",  this.Login);
         this.router.get("/user_profile",  this.GetUserProfile);
-        this.router.get("/:user_id/checkout_history", this.GetSettleHistory);
-        this.router.post("/deposit", this.Deposit);
-        this.router.get("/logs", this.GetLogs);
+        this.router.get("/:user_id/checkout_history",checkUser, this.GetCheckoutHistory);
+        this.router.post("/deposit",checkUser, this.Deposit);
+        this.router.get("/logs",checkUser, this.GetLogs);
     }
 
     private Register = async (req: Request, res: Response) => {
-        const result = await this.userService.Register(req);
-        if (result[0] === StatusEnum.INTERNAL_SYSTEM_ERROR) return res.status(500).send();
+        const fugTag = `${moduleTag}_Register`;
+        try{
+            const result = await this.userService.Register(req);
+            if (result[0] === StatusEnum.INTERNAL_SYSTEM_ERROR) return res.status(500).send();
 
-        if (result[0] === StatusEnum.DUPLICATE_ACCOUNT) return res.status(409).send();
- 
-        return res.status(200).json(new Login(result[1]!.UserId, result[1]!.UserName));
+            if (result[0] === StatusEnum.DUPLICATE_ACCOUNT) return res.status(409).send();
+    
+            return res.status(200).json(new Login(result[1]!.UserId, result[1]!.UserName));
+        }catch(err) {
+            logger.error(fugTag, {error: err, request: req.body});
+            return res.status(500).send();
+        }
     }
 
     private Login = async (req: Request, res: Response) => {
-        const result = await this.userService.Login(req);
-        if (result[0] === StatusEnum.INTERNAL_SYSTEM_ERROR) return res.status(500).send();
-
-        if (result[0] === StatusEnum.USER_NOT_FOUND || result[0] === StatusEnum.PASSWORD_ERROR) return res.status(401).send();
-
-        return res.status(200).json(new Login(result[1]!.UserId, result[1]!.UserName));
+        const fugTag = `${moduleTag}_Login`;
+        try{
+            const result = await this.userService.Login(req);
+    
+            if (result[0] === StatusEnum.INTERNAL_SYSTEM_ERROR) return res.status(500).send();
+    
+            if (result[0] === StatusEnum.USER_NOT_FOUND || result[0] === StatusEnum.PASSWORD_ERROR) return res.status(401).send();
+    
+            return res.status(200).json(new Login(result[1]!.UserId, result[1]!.UserName));
+        }catch(err) {
+            logger.error(fugTag, {error: err, request: req.body});
+            return res.status(500).send();
+        }
     }
 
     private GetUserProfile = async (req: Request, res: Response) => {
-        const result = await this.userService.GetUserProfile(req);
-        if (result[0] === StatusEnum.INTERNAL_SYSTEM_ERROR) return res.status(500).send();
-
-        if (result[0] === StatusEnum.USER_NOT_FOUND ) return res.status(401).send();
-
-        return res.status(200).json(new GetUserProfile(result[1]!.UserId, result[1]!.UserName, result[1]!.Credit, result[1]!.CreatedTime, result[1]!.LastLoginTime));
+        const fugTag = `${moduleTag}_GetUserProfile`;
+        try{
+            const result = await this.userService.GetUserProfile(req);
+            if (result[0] === StatusEnum.INTERNAL_SYSTEM_ERROR) return res.status(500).send();
+    
+            if (result[0] === StatusEnum.USER_NOT_FOUND ) return res.status(401).send();
+    
+            return res.status(200).json(new GetUserProfile(result[1]!.UserId, result[1]!.UserName, result[1]!.Credit, result[1]!.CreatedTime, result[1]!.LastLoginTime));
+        }catch(err) {
+            logger.error(fugTag, {error: err, request: req.body});
+            return res.status(500).send();
+        }
     }
 
 
     private Deposit = async (req: Request, res: Response) => {
-        const result = await this.userService.AddUserDeposit(req);
-        if (result[0] === StatusEnum.INTERNAL_SYSTEM_ERROR) return res.status(500).send();
-
-        if (result[0] === StatusEnum.USER_NOT_FOUND ) return res.status(401).send();
-
-        return res.status(200).send(new GetUserProfile(result[1]!.UserId, result[1]!.UserName, result[1]!.Credit, result[1]!.CreatedTime, 0));
+        const fugTag = `${moduleTag}_Deposit`;
+        try{
+            const result = await this.userService.AddUserDeposit(req);
+            if (result[0] === StatusEnum.INTERNAL_SYSTEM_ERROR) return res.status(500).send();
+    
+            if (result[0] === StatusEnum.USER_NOT_FOUND ) return res.status(401).send();
+    
+            return res.status(200).send(new GetUserProfile(result[1]!.UserId, result[1]!.UserName, result[1]!.Credit, result[1]!.CreatedTime, result[1]!.LastLoginTime));
+        }catch(err) {
+            logger.error(fugTag, {error: err, request: req.body});
+            return res.status(500).send();
+        }
     }
 
     private GetLogs = async (req: Request, res: Response) => {
-        return res.status(200).send();
+        const fugTag = `${moduleTag}_GetLogs`;
+        try{
+            return res.status(200).send();
+        }catch(err) {
+            logger.error(fugTag, {error: err, request: req.body});
+            return res.status(500).send();
+        }
     }
 
-    private GetSettleHistory = async (req: Request, res: Response) => {
-        const result = await this.userService.GetCheckoutHistory(req);
-        if (result[0] === StatusEnum.INTERNAL_SYSTEM_ERROR) return res.status(500).send();
-
-        if (result[0] === StatusEnum.USER_NOT_FOUND ) return res.status(401).send();
-
-        return res.status(200).json(result[1]!.Response);
+    private GetCheckoutHistory = async (req: Request, res: Response) => {
+        const fugTag = `${moduleTag}_GetCheckoutHistory`;
+        try{
+            const result = await this.userService.GetCheckoutHistory(req);
+            if (result[0] === StatusEnum.INTERNAL_SYSTEM_ERROR) return res.status(500).send();
+    
+            if (result[0] === StatusEnum.USER_NOT_FOUND ) return res.status(401).send();
+    
+            return res.status(200).json(result[1]!.Response);
+        }catch(err) {
+            logger.error(fugTag, {error: err, request: req.body});
+            return res.status(500).send();
+        }
     }
 }
 

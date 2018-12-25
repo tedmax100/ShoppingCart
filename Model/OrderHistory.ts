@@ -42,7 +42,7 @@ export class OrderHistroy {
         return {
             account: this.Account,
             name: this.Name,
-            order: this.OrderList.map(o => {
+            orderList: this.OrderList.map(o => {
                 return {
                     order_no:o.OrderNo,
                     created_time: o.CreatedTime,

@@ -12,7 +12,7 @@ export class UserService {
     public Register = async(context: Request): Promise<[StatusEnum, UserProfile|undefined]> => {
         let userProfile = new UserProfile()
                             .SetAccount(context.body.account)
-                            .SetPassword(context.body.password)
+                            .SetHashPassword(context.body.password)
                             .SetUserName(context.body.name)
                             .SetCredit(context.body.credit);
 
@@ -61,21 +61,24 @@ export class UserService {
     public GetCheckoutHistory = async(context: Request): Promise<[StatusEnum, OrderHistroy|undefined]> => {
         let userProfile = new UserProfile()
                            .SetUserId(context.params.user_id);
-
+        
         let userProfileDb = await UserRepositoryInstance.GetUserProfile(userProfile);
         if(userProfileDb[0] === false) return [StatusEnum.INTERNAL_SYSTEM_ERROR, undefined];
         
-        const orderHistroy: OrderHistroy = new OrderHistroy();
-        orderHistroy.SetAccount(userProfileDb[1]!.Account).SetName(userProfileDb[1]!.UserName);
+        const orderHistroy: OrderHistroy = new OrderHistroy()
+            .SetAccount(userProfileDb[1]!.Account)
+            .SetName(userProfileDb[1]!.UserName);
 
         let checkoutHistory = await UserRepositoryInstance.GetCheckoutHistory(userProfile);
         let orderGroup = _.groupBy(checkoutHistory[1], "order_no");
         _.map(orderGroup, (group) => {
-            const order = new OrderDetail();
-            order.SetOrderNo(group[0].order_no).SetCreatedTime(group[0].created_time);
+            const order = new OrderDetail()
+                .SetOrderNo(group[0].order_no)
+                .SetCreatedTime(group[0].created_time);
+
             _.map(group, (item) => {
-                const itemDetail = new ItemDetail();
-                itemDetail.SetItemName(item.item_name)
+                const itemDetail = new ItemDetail()
+                    .SetItemName(item.item_name)
                     .SetAmount(item.amount)
                     .SetItemPrice(item.item_price)
                     .SetSubtoal(item.subtotal);
@@ -89,22 +92,13 @@ export class UserService {
     }
 
     public AddUserDeposit = async(context: Request): Promise<[StatusEnum, UserProfile|undefined]> =>　{
-        // step 1 : check userid exist
-        // step 2 : add deposit 
-
         let userProfile = new UserProfile()
-                            .SetUserId(context.body.user_id)
-        let depositAmount = parseInt(context.body.amount);
+                            .SetUserId(context.body.user_id);
 
-        let depositResult = await UserRepositoryInstance.AddUserDeposit(userProfile, depositAmount);
-
-        return depositResult;
+        return await UserRepositoryInstance.AddUserDeposit(userProfile, parseInt(context.body.amount));
     }
 
     public GetLogs = async(context: Request): Promise<[StatusEnum, UserProfile|undefined]> =>　{
-        // step 1 : check userid exist
-        // step 2 : get logs 
-
         let userProfile = new UserProfile()
                             .SetAccount(context.body.account)
         if(userProfile.Account == "") return [StatusEnum.PARAMETER_ERROR, undefined];

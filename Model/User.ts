@@ -1,18 +1,19 @@
-import * as bcrypt from "bcrypt";
-
+import * as bcrypt from 'bcrypt';
 export class UserProfile {
     private userId: number;
     private account: string;
     private password: string;
+    private hashPassword: string;
     private userName: string;
     private credit: number;
     private createdTime: number;
     private lastLoginTime: number;
-
+    
     constructor() {
         this.userId = 0;
         this.account = "";
         this.password = "";
+        this.hashPassword = "";
         this.userName = "";
         this.credit = 0;
         this.createdTime = 0;
@@ -40,8 +41,16 @@ export class UserProfile {
     } 
     public SetPassword(value: string) {
         if(value.length < 8) this.password = "";
-        //else this.password = bcrypt.hashSync(value, 5);
         else this.password = value;
+        return this;
+    }
+    
+    get HashPassword(): string {
+        return this.hashPassword;
+    }
+    public SetHashPassword(value: string) {
+        if(value.length < 8) this.password = "";
+        else this.password = bcrypt.hashSync(value, 5);
         return this;
     } 
     get UserName():string {
@@ -85,7 +94,7 @@ export class UserProfile {
             && this.credit == null;
     }
 
-    public IsNullObject = (): boolean => this.account === "";
+    public IsNullObject = (): boolean => this.account === "" || this.UserId === 0;
 
     public GetQuerySyntax = (): string => this.account === "" ? `user_id = ${this.userId}` : `account = '${this.account}'`;
 }

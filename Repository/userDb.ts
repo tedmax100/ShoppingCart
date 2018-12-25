@@ -29,9 +29,8 @@ class UserRepository {
         const funTag = `${moduleTag}_Register`;
         return new Promise<[boolean, number ,StatusEnum]>((resolve) => {
             writablePool
-            .query("INSERT INTO user_profile(user_name, account, password, credit, created_time) \
-                    VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP);", 
-                    [params.UserName, params.Account, params.Password, params.Credit],
+            .query(`INSERT INTO user_profile(user_name, account, password, credit, created_time) \
+                    VALUES (${params.UserName}, ${params.Account}, ${params.HashPassword}, ${params.Credit}, UNIX_TIMESTAMP());`, 
                     (err, result) => { 
                         if(err) {
                             logger.error(funTag, {error:err, param: params});
@@ -41,8 +40,7 @@ class UserRepository {
                         
                         return resolve([true, result.insertId , StatusEnum.SUCCESS])
                     }
-            )
-                
+            )   
         })
     }
 
@@ -54,7 +52,7 @@ class UserRepository {
                     FROM user_profile 
                     WHERE ${params.GetQuerySyntax()};
                     INSERT INTO user_login_log(user_id, created_time)
-                    SELECT user_id, unix_timestamp()
+                    SELECT user_id, UNIX_TIMESTAMP()
                     FROM user_profile 
                     WHERE ${params.GetQuerySyntax()};`, 
                     (err, result) => { 
@@ -116,15 +114,8 @@ class UserRepository {
                 INNER JOIN product_item AS p ON p.item_id = c.item_id
                 WHERE t.user_id = ${params.UserId}`, (checkoutErr, result) => {
                 if(checkoutErr) {
-                    debugger;
                     return resolve([StatusEnum.INTERNAL_SYSTEM_ERROR, []]);
                 }
-                let history = _.chain(result).groupBy("order_no").map(v => {
-                    let sum = _.sumBy(v, (data) => {
-                      return  data.amount * data.item_price;
-                    })
-                }).value();
-                debugger;
                 return resolve([StatusEnum.SUCCESS, result]);
             })
         })
@@ -139,7 +130,6 @@ class UserRepository {
 		                        VALUES (${params.UserId}, 3, 'deposit', ${depositAmount}, UNIX_TIMESTAMP());`,
             (err, result) => {
                 if(err) {
-                    debugger;
                     return resolve([StatusEnum.INTERNAL_SYSTEM_ERROR, undefined]);
                 }
                 if(result[0].affectedRows === 0) return resolve([StatusEnum.USER_NOT_FOUND, undefined]);
@@ -156,7 +146,8 @@ class UserRepository {
     }
 
     public GetUserLogs = async (params: any) => {
-
+        // return new Promise<[StatusEnum, ]>
+        return ;
     }
 }
 
