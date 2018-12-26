@@ -97,4 +97,21 @@ export class UserProfile {
     public IsNullObject = (): boolean => this.account === "" || this.UserId === 0;
 
     public GetQuerySyntax = (): string => this.account === "" ? `user_id = ${this.userId}` : `account = '${this.account}'`;
+
+    get Response(): object {
+        return {
+            user_id: this.UserId,
+            name: this.UserName,
+            credit :this.credit,
+            last_login_time: this.lastLoginTime,
+            created_time:this.createdTime
+        }
+    }
+
+    get LoginResponse(): object {
+        return {
+            user_id: this.UserId,
+            name: this.UserName
+        }
+    }
 }

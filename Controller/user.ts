@@ -1,8 +1,6 @@
 import { Request, Response, Router } from "express";
 import {UserService} from "../Service/userService";
 import { StatusEnum } from '../Model/ApiStatus';
-import { Login } from '../Model/Response/Login';
-import { GetUserProfile } from '../Model/Response/GetUserProfile';
 import { logger } from '../logger';
 import { checkUser } from '../Middleware/checkUser';
 const moduleTag = "UserController";
@@ -34,7 +32,7 @@ export class UserController {
 
             if (result[0] === StatusEnum.DUPLICATE_ACCOUNT) return res.status(409).send();
     
-            return res.status(200).json(new Login(result[1]!.UserId, result[1]!.UserName));
+            return res.status(200).json(result[1]!.LoginResponse);
         }catch(err) {
             logger.error(fugTag, {error: err, request: req.body});
             return res.status(500).send();
@@ -50,7 +48,7 @@ export class UserController {
     
             if (result[0] === StatusEnum.USER_NOT_FOUND || result[0] === StatusEnum.PASSWORD_ERROR) return res.status(401).send();
     
-            return res.status(200).json(new Login(result[1]!.UserId, result[1]!.UserName));
+            return res.status(200).json(result[1]!.LoginResponse);
         }catch(err) {
             logger.error(fugTag, {error: err, request: req.body});
             return res.status(500).send();
@@ -65,7 +63,7 @@ export class UserController {
     
             if (result[0] === StatusEnum.USER_NOT_FOUND ) return res.status(401).send();
     
-            return res.status(200).json(new GetUserProfile(result[1]!.UserId, result[1]!.UserName, result[1]!.Credit, result[1]!.CreatedTime, result[1]!.LastLoginTime));
+            return res.status(200).json(result[1]!.Response);
         }catch(err) {
             logger.error(fugTag, {error: err, request: req.body});
             return res.status(500).send();
@@ -81,7 +79,7 @@ export class UserController {
     
             if (result[0] === StatusEnum.USER_NOT_FOUND ) return res.status(401).send();
     
-            return res.status(200).send(new GetUserProfile(result[1]!.UserId, result[1]!.UserName, result[1]!.Credit, result[1]!.CreatedTime, result[1]!.LastLoginTime));
+            return res.status(200).json(result[1]!.Response);
         }catch(err) {
             logger.error(fugTag, {error: err, request: req.body});
             return res.status(500).send();
