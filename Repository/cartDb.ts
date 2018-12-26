@@ -8,9 +8,9 @@ import { UserProfile } from '../Model/User';
 const writablePool = mysql.createPool({
     connectionLimit : 10,
     host : "",
-    port : 3307,
-    user : "carts",
-    password : "qwer1234",
+    port : ,
+    user : "",
+    password : "",
     database : "carts",
     multipleStatements : true
 });
