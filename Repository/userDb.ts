@@ -30,7 +30,7 @@ class UserRepository {
         return new Promise<[boolean, number ,StatusEnum]>((resolve) => {
             writablePool
             .query(`INSERT INTO user_profile(user_name, account, password, credit, created_time) \
-                    VALUES (${params.UserName}, ${params.Account}, ${params.HashPassword}, ${params.Credit}, UNIX_TIMESTAMP());`, 
+                    VALUES ('${params.UserName}', '${params.Account}', '${params.HashPassword}', ${params.Credit}, UNIX_TIMESTAMP());`, 
                     (err, result) => { 
                         if(err) {
                             logger.error(funTag, {error:err, param: params});
@@ -124,7 +124,6 @@ class UserRepository {
     public AddUserDeposit = async (params: UserProfile, depositAmount: number) => {
         return new Promise<[StatusEnum, UserProfile|undefined]>((resolve) => {
             writablePool.query(`UPDATE user_profile SET credit = credit + ${depositAmount} WHERE user_id = ${params.UserId};
-                                INSERT INTO user_deposit (user_id, amount, created_time) SELECT user_id, ${depositAmount}, UNIX_TIMESTAMP() FROM user_profile WHERE user_id =${params.UserId};
                                 SELECT user_id, user_name, account, credit, created_time FROM user_profile WHERE user_id =${params.UserId};
                                 INSERT INTO user_log(user_id, action_type, action_value, remark, created_time)
 		                        VALUES (${params.UserId}, 3, 'deposit', ${depositAmount}, UNIX_TIMESTAMP());`,
@@ -135,19 +134,28 @@ class UserRepository {
                 if(result[0].affectedRows === 0) return resolve([StatusEnum.USER_NOT_FOUND, undefined]);
 
                 const dbResult: UserProfile = new UserProfile()
-                .SetAccount(result[2][0].account)
-                .SetCredit(result[2][0].credit)
-                .SetUserName(result[2][0].user_name)
-                .SetUserId(result[2][0].user_id)
-                .SetCreatedTime(result[2][0].created_time);
+                .SetAccount(result[1][0].account)
+                .SetCredit(result[1][0].credit)
+                .SetUserName(result[1][0].user_name)
+                .SetUserId(result[1][0].user_id)
+                .SetCreatedTime(result[1][0].created_time);
                 return resolve([StatusEnum.SUCCESS, dbResult]);
             })
         })
     }
 
-    public GetUserLogs = async (params: any) => {
-        // return new Promise<[StatusEnum, ]>
-        return ;
+    public GetUserLogs = async (params: UserProfile) => {
+        const funTag = `${moduleTag}_GetUserLogs`;
+        return new Promise<[StatusEnum, any[]]> ((resolve) => {
+            readOnlyPool.query(`SELECT user_id, action_type, action_value, remark, created_time FROM carts.user_log 
+            WHERE user_id = ${params.UserId};`, (err, result) => {
+                if(err) {
+                    logger.error(funTag, {error:err, param: params});
+                    return resolve([StatusEnum.INTERNAL_SYSTEM_ERROR, []]);
+                }
+                return resolve([StatusEnum.SUCCESS, result]);
+            })
+        })
     }
 }
 

@@ -49,8 +49,8 @@ export class UserProfile {
         return this.hashPassword;
     }
     public SetHashPassword(value: string) {
-        if(value.length < 8) this.password = "";
-        else this.password = bcrypt.hashSync(value, 5);
+        if(value.length < 8) this.hashPassword = "";
+        else this.hashPassword = bcrypt.hashSync(value, 5);
         return this;
     } 
     get UserName():string {

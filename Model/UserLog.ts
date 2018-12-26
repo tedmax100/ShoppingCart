@@ -26,10 +26,25 @@ export class UserLog {
         return this;
     }
 
+    get UserActionList(): UserAction[]{
+        return this.userActionList;
+    }
+
+    public AddAction = (action: UserAction) => {
+        this.userActionList.push(action);
+    }
+
     get Response(): Object {
         return {
             account: this.Account,
-            name: this.UserName
+            name: this.UserName,
+            log_list: this.userActionList.map(v =>{
+                return {
+                    action: v.ActionValue,
+                    remarks: v.Remarks,
+                    created_time: v.CreatedTime
+                }
+            })
         }
     }
 }

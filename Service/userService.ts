@@ -7,6 +7,8 @@ import * as _ from "lodash";
 import { OrderDetail } from "../Model/Order";
 import { ItemDetail } from '../Model/Item';
 import { OrderHistroy } from '../Model/OrderHistory';
+import { UserLog } from "../Model/UserLog";
+import { UserAction } from "../Model/UserAction";
 
 export class UserService {
     public Register = async(context: Request): Promise<[StatusEnum, UserProfile|undefined]> => {
@@ -60,14 +62,16 @@ export class UserService {
 
     public GetCheckoutHistory = async(context: Request): Promise<[StatusEnum, OrderHistroy|undefined]> => {
         let userProfile = new UserProfile()
-                           .SetUserId(context.params.user_id);
+                           .SetUserId((context.userProfile as UserProfile).UserId)
+                           .SetAccount((context.userProfile as UserProfile).Account)
+                           .SetUserName((context.userProfile as UserProfile).UserName);
         
-        let userProfileDb = await UserRepositoryInstance.GetUserProfile(userProfile);
-        if(userProfileDb[0] === false) return [StatusEnum.INTERNAL_SYSTEM_ERROR, undefined];
+       /*  let userProfileDb = await UserRepositoryInstance.GetUserProfile(userProfile);
+        if(userProfileDb[0] === false) return [StatusEnum.INTERNAL_SYSTEM_ERROR, undefined]; */
         
         const orderHistroy: OrderHistroy = new OrderHistroy()
-            .SetAccount(userProfileDb[1]!.Account)
-            .SetName(userProfileDb[1]!.UserName);
+            .SetAccount(userProfile.Account)
+            .SetName(userProfile.UserName);
 
         let checkoutHistory = await UserRepositoryInstance.GetCheckoutHistory(userProfile);
         let orderGroup = _.groupBy(checkoutHistory[1], "order_no");
@@ -98,17 +102,29 @@ export class UserService {
         return await UserRepositoryInstance.AddUserDeposit(userProfile, parseInt(context.body.amount));
     }
 
-    public GetLogs = async(context: Request): Promise<[StatusEnum, UserProfile|undefined]> =>　{
+    public GetLogs = async(context: Request): Promise<[StatusEnum, UserLog]> =>　{
         let userProfile = new UserProfile()
-                            .SetAccount(context.body.account)
-        if(userProfile.Account == "") return [StatusEnum.PARAMETER_ERROR, undefined];
+                            .SetAccount((context.userProfile as UserProfile).Account)
+                            .SetUserId((context.userProfile as UserProfile).UserId)
+                            .SetUserName((context.userProfile as UserProfile).UserName);
 
-        let userProfileDb = await UserRepositoryInstance.GetUserProfile(userProfile);
-        
-        if(userProfileDb[0] === false) return [StatusEnum.INTERNAL_SYSTEM_ERROR, undefined];
-        
-        if(userProfileDb[1]!.IsNullObject()) return [StatusEnum.USER_NOT_FOUND, undefined];
+        if(userProfile.Account == "") return [StatusEnum.PARAMETER_ERROR, new UserLog()];
 
-        return [StatusEnum.SUCCESS, userProfileDb[1]!];
+        let dbResult = await UserRepositoryInstance.GetUserLogs(userProfile);
+
+        if(dbResult[0] === StatusEnum.INTERNAL_SYSTEM_ERROR) {
+            return [StatusEnum.INTERNAL_SYSTEM_ERROR,  new UserLog()];
+        }
+        const userLog: UserLog = new UserLog().SetAccount(userProfile.Account).SetUserName(userProfile.UserName);
+
+        dbResult[1].map(v => {
+            const userAction: UserAction = new UserAction()
+            .SetActionType(v.action_type)
+            .SetActionValue(v.action_value)
+            .SetRemarks(v.remark)
+            .SetCreatedTime(v.created_time);
+            userLog.AddAction(userAction);
+        })
+        return [StatusEnum.SUCCESS, userLog];
     }
 }

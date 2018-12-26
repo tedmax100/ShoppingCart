@@ -1,12 +1,17 @@
 export class UserAction {
-    private actionType?: number;
-    private actionValue?: string;
-    private createdTime?: number;
-    private remarks?: string;
+    private actionType: number;
+    private actionValue: string;
+    private createdTime: number;
+    private remarks: string;
 
-    constructor() {    }
+    constructor() {    
+        this.actionType = 0;
+        this.actionValue = "";
+        this.createdTime = 0;
+        this.remarks = "";
+    }
 
-    get ActionType(): number|undefined {
+    get ActionType(): number {
         return this.actionType;
     }
     public  SetActionType(value: number) {
@@ -14,7 +19,7 @@ export class UserAction {
         return this;
     }
 
-    get ActionValue(): string|undefined {
+    get ActionValue(): string {
         return this.actionValue;
     }
     public  SetActionValue(value: string) {
@@ -22,7 +27,7 @@ export class UserAction {
         return this;
     }
 
-    get CreatedTime(): number|undefined {
+    get CreatedTime(): number {
         return this.createdTime;
     }
     public  SetCreatedTime(value: number) {
@@ -30,7 +35,7 @@ export class UserAction {
         return this;
     }
 
-    get Remarks(): string|undefined {
+    get Remarks(): string {
         return this.remarks;
     }
     public SetRemarks(value: string) {

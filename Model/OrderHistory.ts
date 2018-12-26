@@ -59,4 +59,26 @@ export class OrderHistroy {
             })
         }
     }
+
+    get ResponseA(): Object {
+        return {
+            account: this.Account,
+            name: this.Name,
+            orderList: this.OrderList.map(o => {
+                return {
+                    order_no:o.OrderNo,
+                    created_time: o.CreatedTime,
+                    total: o.Total,
+                    item_list: o.ItemList.map(i => {
+                        return {
+                            item_name: i.ItemName,
+                            item_price: i.ItemPrice,
+                            amount: i.Amount,
+                            subtotal: i.Subtoal
+                        }
+                    })
+                }
+            })
+        }
+    }
 }

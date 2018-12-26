@@ -13,7 +13,10 @@ export class CartService {
         let item: ItemDetail = new ItemDetail()
                             .SetItemId(context.body.item_id)
                             .SetAmount(context.body.amount);
-        return await CartRepositoryInstance.AddItemToCart(shoppingCart.UserId,item);
+               
+        return await item.Amount === 0 ? 
+            CartRepositoryInstance.DeleteItemOfCart(shoppingCart.UserId,item) :
+            CartRepositoryInstance.AddItemToCart(shoppingCart.UserId,item);
     }
 
     public DeleteItemFromCart = async(context: Request) => {

@@ -20,8 +20,8 @@ export class UserController {
     public init() {
         this.router.post("/register", this.Register);
         this.router.post("/login",  this.Login);
-        this.router.get("/user_profile",  this.GetUserProfile);
-        this.router.get("/:user_id/checkout_history",checkUser, this.GetCheckoutHistory);
+        this.router.get("/user_profile",checkUser, this.GetUserProfile);
+        this.router.get("/checkout_history",checkUser, this.GetCheckoutHistory);
         this.router.post("/deposit",checkUser, this.Deposit);
         this.router.get("/logs",checkUser, this.GetLogs);
     }
@@ -91,7 +91,10 @@ export class UserController {
     private GetLogs = async (req: Request, res: Response) => {
         const fugTag = `${moduleTag}_GetLogs`;
         try{
-            return res.status(200).send();
+            const result = await this.userService.GetLogs(req);
+            if (result[0] === StatusEnum.INTERNAL_SYSTEM_ERROR) return res.status(500).send();
+
+            return res.status(200).json(result[1]!.Response);
         }catch(err) {
             logger.error(fugTag, {error: err, request: req.body});
             return res.status(500).send();

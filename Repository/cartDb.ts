@@ -67,7 +67,7 @@ class CartRepository {
                 if(checkoutErr) {
                     return resolve(StatusEnum.INTERNAL_SYSTEM_ERROR);
                 }
-                if(result[1][0].affectedRows === 0) return resolve(StatusEnum.ITEM_NOT_ENOUGH);
+                if(result[1].affectedRows === 0) return resolve(StatusEnum.ITEM_NOT_ENOUGH);
                 return resolve(StatusEnum.SUCCESS);
             })
         })

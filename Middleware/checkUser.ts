@@ -16,7 +16,7 @@ export const checkUser: RequestHandler = async (req: Request, res: Response, nex
 
         if(repository[0] === false) return res.status(500).send();
         if(isNullOrUndefined(repository[1]) ) return res.status(401).send();
-        req.user = repository[1]!;
+        req.userProfile = repository[1]!;
         return next();
     }catch(exp) {
         return  next(createError(500));
