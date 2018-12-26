@@ -2,8 +2,8 @@ import * as bodyParser from "body-parser";
 import express from "express";
 import {NextFunction, Request, RequestHandler, Response, ErrorRequestHandler } from "express";
 import * as helmet from "helmet";
-import { userRouter } from "./controller/user";
-import { cartRouter } from "./controller/cart";
+import { userRouter } from "./Controller/user";
+import { cartRouter } from "./Controller/cart";
 const _moduleTag = "App";
 // Creates and configures an ExpressJS web server.
 class App {
@@ -18,6 +18,9 @@ class App {
         this.middleware();
         this.routes();
         this.express.use(this.errorHandler);
+        this.express.use('*', (req: Request, res: Response) => {
+            return res.status(404).send({ error: 'Not found' });
+        })
         // todo: prepare your db here
     }
     private middleware(): void {

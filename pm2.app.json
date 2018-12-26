@@ -1,0 +1,13 @@
+{
+    "apps": [
+      {
+        "name": "ShoppingCart01",
+        "script": "./dist/index.js",
+        "args": "8801",
+        "instances" : "max",
+        "exec_mode" : "cluster",
+        "node-args": "--nouse-idle-notification --gc_global --max-old-space-size=512 --max-new-space-size=256",
+        "max_memory_restart" : "200M"
+      }
+    ]
+}

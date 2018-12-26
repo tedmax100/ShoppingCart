@@ -1,7 +1,7 @@
 import * as http from "http";
 import App from "./app";
 const _moduleTag = "index";
-const port = normalizePort(process.argv[3] || "8995");
+const port = normalizePort(process.argv[3] || "8801");
 App.set("port", port);
 const server = http.createServer(App);
 server.listen(port);
