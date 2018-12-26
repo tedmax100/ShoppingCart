@@ -7,7 +7,7 @@ import { UserProfile } from '../Model/User';
 
 const writablePool = mysql.createPool({
     connectionLimit : 10,
-    host : "carts-cluster.cluster-cq5kxkv5qjb7.ap-northeast-2.rds.amazonaws.com",
+    host : "",
     port : 3307,
     user : "carts",
     password : "qwer1234",
